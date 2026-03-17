@@ -15,15 +15,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('combined', {stream: {write: (message) => logger.info(message.trim()) }}));
 app.use(cookieParser());
-app.use(securityMiddleware);
+
+// Define healthcheck route BEFORE any security middleware
+app.get('/health', (req, res) => {
+  res.status(200).json({status: 'OK', timestamp: new Date().toISOString(), uptime: process.uptime()});
+});
+
+// Apply custom Arcjet security middleware only in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(securityMiddleware);
+}
 
 app.get('/', (req,res) => {
   logger.info('Hello from Acquisitions!');
   res.status(200).send('Hello from Acquisitions!');
-});
-
-app.get('/health', (req, res) => {
-  res.status(200).json({status: 'OK', timestamp: new Date().toISOString(), uptime: process.uptime()});
 });
 
 app.get('/api', (req, res) => {

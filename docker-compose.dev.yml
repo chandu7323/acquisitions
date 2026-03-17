@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # Neon Local proxy for ephemeral branching and local development
+  neon-local:
+    image: neondatabase/neon_local:latest
+    container_name: acquisitions-neon-local
+    env_file:
+      - .env.development
+    ports:
+      - "5432:5432"
+    networks:
+      - acquisitions-network
+
+  # Acquisitions Application - Development
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: acquisitions-app-dev
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.development
+    volumes:
+      # Mount source code for hot reloading in development
+      - ./src:/app/src:ro
+      - ./package.json:/app/package.json:ro
+      - ./drizzle.config.js:/app/drizzle.config.js:ro
+      # Mount logs directory for persistent logs
+      - ./logs:/app/logs
+    depends_on:
+      - neon-local
+    restart: unless-stopped
+    networks:
+      - acquisitions-network
+    healthcheck:
+      test: ["CMD", "wget", "--header=User-Agent: Docker-Health-Check/1.0", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Database Migration Service
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: acquisitions-migrate-dev
+    env_file:
+      - .env.development
+    volumes:
+      - ./drizzle:/app/drizzle:ro
+      - ./drizzle.config.js:/app/drizzle.config.js:ro
+      - ./src/models:/app/src/models:ro
+    depends_on:
+      - neon-local
+    command: ["npm", "run", "db:migrate"]
+    networks:
+      - acquisitions-network
+
+networks:
+  acquisitions-network:
+    driver: bridge

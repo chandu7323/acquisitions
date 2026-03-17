@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # Acquisitions Application - Production
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: acquisitions-app-prod
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.production
+    volumes:
+      # Mount logs directory for persistent logs
+      - ./logs:/app/logs
+      # Mount for log rotation (optional)
+      - /var/log/acquisitions:/var/log/acquisitions
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - acquisitions-network
+
+  # Database Migration Service - Production
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: acquisitions-migrate-prod
+    env_file:
+      - .env.production
+    command: ["npm", "run", "db:migrate"]
+    restart: "no"
+    networks:
+      - acquisitions-network
+
+  # Reverse Proxy (Optional - for production load balancing)
+  nginx:
+    image: nginx:alpine
+    container_name: acquisitions-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+    networks:
+      - acquisitions-network
+
+networks:
+  acquisitions-network:
+    driver: bridge
