@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.routes.js';
+import usersRoutes from './routes/users.routes.js';
 import securityMiddleware from '#middleware/security.middleware.js';
 
 const app = express();
@@ -36,5 +37,19 @@ app.get('/api', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes); //api/auth/sign-in
+app.use("/api/users", usersRoutes);
+app.use((req,res)=>{
+  res.status(404).json({error: 'Route not found'});
+});
+// Catch-all 404 handler for undefined API routes
+app.use((req, res, next) => {
+  res.status(404).json({ error: `Route ${req.method} ${req.originalUrl} not found` });
+});
+
+// Global JSON error handler
+app.use((err, req, res, next) => {
+  logger.error(`Unhandled Error: ${err.stack || err.message}`);
+  res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
+});
 
 export default app;
