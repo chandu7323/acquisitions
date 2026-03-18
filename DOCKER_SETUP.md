@@ -20,22 +20,24 @@ The application supports two distinct deployment modes:
 ### Development Environment (Neon Local)
 
 1. **Clone and navigate to the project**:
+
    ```bash
    git clone <your-repo-url>
    cd acquisitions
    ```
 
 2. **Start development environment**:
+
    ```bash
    npm run docker:dev
    ```
-   
+
    This command:
    - Builds the app with development target
    - Starts Neon Local PostgreSQL proxy
    - Runs database migrations
    - Starts the app with hot reloading
-   
+
 3. **Access the application**:
    - API: http://localhost:3000
    - Health check: http://localhost:3000/health
@@ -49,10 +51,11 @@ The application supports two distinct deployment modes:
 ### Production Environment (Neon Cloud)
 
 1. **Configure environment variables**:
+
    ```bash
    # Create production environment file
    cp .env.production .env.prod.local
-   
+
    # Edit with your actual values
    export DATABASE_URL=postgres://neon:npg@neon-local:5432/acquisitions?sslmode=require
    export JWT_SECRET="your-secure-jwt-secret"
@@ -60,6 +63,7 @@ The application supports two distinct deployment modes:
    ```
 
 2. **Start production environment**:
+
    ```bash
    npm run docker:prod
    ```
@@ -126,12 +130,13 @@ The `Dockerfile` uses multi-stage builds with four stages:
 
 ```yaml
 services:
-  neon-local:    # PostgreSQL proxy for local development
-  app:           # Application with hot reloading
-  migrate:       # Database migration service
+  neon-local: # PostgreSQL proxy for local development
+  app: # Application with hot reloading
+  migrate: # Database migration service
 ```
 
 **Features**:
+
 - Neon Local PostgreSQL proxy
 - Hot reloading with volume mounts
 - Automatic migrations
@@ -142,12 +147,13 @@ services:
 
 ```yaml
 services:
-  app:           # Optimized production app
-  migrate:       # Production migrations
-  nginx:         # Reverse proxy (optional)
+  app: # Optimized production app
+  migrate: # Production migrations
+  nginx: # Reverse proxy (optional)
 ```
 
 **Features**:
+
 - Connects to Neon Cloud Database
 - Optimized production build
 - Resource limits
@@ -200,6 +206,7 @@ docker build --target production -t acquisitions:prod .
 ### Development with Neon Local
 
 Neon Local automatically:
+
 - Creates a PostgreSQL database
 - Sets up user credentials
 - Handles connection pooling
@@ -213,6 +220,7 @@ Neon Local automatically:
    - Copy the connection string
 
 2. **Configure Environment**:
+
    ```bash
    export DATABASE_URL="postgresql://user:pass@host.neon.tech/db?sslmode=require"
    ```
@@ -227,28 +235,31 @@ Neon Local automatically:
 ### Common Issues
 
 1. **Port Conflicts**:
+
    ```bash
    # Check what's using port 3000
    lsof -i :3000
-   
+
    # Kill the process
    kill -9 <PID>
    ```
 
 2. **Database Connection Issues**:
+
    ```bash
    # Check Neon Local logs
    docker-compose -f docker-compose.dev.yml logs neon-local
-   
+
    # Test database connection
    docker-compose -f docker-compose.dev.yml exec neon-local pg_isready -U neondb_owner
    ```
 
 3. **Migration Issues**:
+
    ```bash
    # Run migrations manually
    docker-compose -f docker-compose.dev.yml run migrate
-   
+
    # Reset database (development only)
    docker-compose -f docker-compose.dev.yml down -v
    docker-compose -f docker-compose.dev.yml up --build
@@ -270,11 +281,13 @@ docker-compose -f docker-compose.dev.yml logs -f app
 ## Security Considerations
 
 ### Development
+
 - Uses weak passwords (acceptable for local development)
 - Debug logging enabled
 - No SSL/TLS required
 
 ### Production
+
 - Strong JWT secrets required
 - Production Arcjet keys
 - SSL/TLS connections to Neon Cloud
@@ -298,11 +311,13 @@ npm run docker:prod
 ### Cloud Deployment
 
 The production Docker Compose can be used with:
+
 - Docker Swarm
 - Kubernetes (with kompose conversion)
 - Cloud services (AWS ECS, Google Cloud Run, Azure Container Instances)
 
 Example for AWS ECS task definition generation:
+
 ```bash
 # Convert docker-compose to ECS format
 ecs-cli compose --file docker-compose.prod.yml convert
@@ -319,6 +334,7 @@ ecs-cli compose --file docker-compose.prod.yml convert
 ### Docker Health Checks
 
 Both development and production configurations include:
+
 - Application health checks
 - Database connection verification
 - Automatic restart policies
@@ -326,6 +342,7 @@ Both development and production configurations include:
 ### Logs
 
 Logs are written to:
+
 - **Console**: Structured JSON logs via Winston
 - **Files**: `./logs/` directory (mounted as volume)
 - **Docker**: Standard Docker logging drivers

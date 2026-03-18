@@ -9,6 +9,7 @@ Node.js/Express REST API using ES Modules (`"type": "module"`). Uses Drizzle ORM
 ## Environment
 
 Requires a `.env` file with:
+
 - `DATABASE_URL` — Neon PostgreSQL connection string
 - `JWT_SECRET` — secret for signing JWTs
 - `PORT` — (optional, defaults to `3000`)
@@ -42,6 +43,7 @@ There is no test script defined yet (ESLint config has Jest globals stubbed out 
 **Entry point flow:** `src/index.js` → loads `.env`, then `src/server.js` → starts the Express app from `src/app.js` on `PORT`.
 
 **Layer structure** (each layer only imports from layers below it):
+
 - `src/routes/` — mounts controllers on Express routers; imported in `app.js`
 - `src/controllers/` — validates request body with Zod schemas, calls a service, signs a JWT, sets cookie, returns response
 - `src/services/` — business logic; interacts with the database via Drizzle
