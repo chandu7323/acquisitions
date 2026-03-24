@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: acquisitions-service
+spec:
+  selector:
+    app: acquisitions-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  # Use LoadBalancer if you want your cloud provider to assign an external IP
+  type: ClusterIP

@@ -59,12 +59,10 @@ export const updateUser = async (req, res, next) => {
     const updates = validatedData.body; // Safely stripped of unknown fields by Zod
 
     if (Object.keys(updates).length === 0) {
-      return res
-        .status(400)
-        .json({
-          message: 'Validation Error',
-          errors: 'No valid fields provided for update',
-        });
+      return res.status(400).json({
+        message: 'Validation Error',
+        errors: 'No valid fields provided for update',
+      });
     }
 
     logger.info(`Updating user with id: ${id}`);
@@ -76,20 +74,16 @@ export const updateUser = async (req, res, next) => {
 
       // Can only modify their own info
       if (!isSelf && !isAdmin) {
-        return res
-          .status(403)
-          .json({
-            message: 'Forbidden: You can only update your own information',
-          });
+        return res.status(403).json({
+          message: 'Forbidden: You can only update your own information',
+        });
       }
 
       // Role escalation protection
       if (updates.role && !isAdmin) {
-        return res
-          .status(403)
-          .json({
-            message: 'Forbidden: Only administrators can update user roles',
-          });
+        return res.status(403).json({
+          message: 'Forbidden: Only administrators can update user roles',
+        });
       }
     }
 

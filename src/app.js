@@ -23,13 +23,11 @@ app.use(cookieParser());
 
 // Define healthcheck route BEFORE any security middleware
 app.get('/health', (req, res) => {
-  res
-    .status(200)
-    .json({
-      status: 'OK',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-    });
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
 });
 
 // Apply custom Arcjet security middleware only in production

@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: acquisitions-migrate
+spec:
+  template:
+    spec:
+      containers:
+      - name: migrate
+        image: chandu2/acquisitions:latest
+        imagePullPolicy: Always
+        command: ["/bin/sh", "-c", "NODE_ENV=development npm install drizzle-kit@0.31.9 && npm run db:migrate"]
+        envFrom:
+        - secretRef:
+            name: acquisitions-secrets
+      restartPolicy: OnFailure

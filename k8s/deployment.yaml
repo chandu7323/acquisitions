@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acquisitions-api
+  labels:
+    app: acquisitions-api
+spec:
+  replicas: 2 # Number of instances to run
+  selector:
+    matchLabels:
+      app: acquisitions-api
+  template:
+    metadata:
+      labels:
+        app: acquisitions-api
+    spec:
+      containers:
+      - name: api
+        image: chandu2/acquisitions:latest
+        command: ["node", "src/index.js"]
+        ports:
+        - containerPort: 3000
+        envFrom:
+        - secretRef:
+            name: acquisitions-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 40
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
