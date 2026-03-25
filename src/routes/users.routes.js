@@ -5,11 +5,13 @@ import {
   updateUser,
   deleteUser,
 } from '#controllers/users.controller.js';
+import { authenticate, authorizeAdmin } from '#middleware/auth.middleware.js';
+
 const router = express.Router();
 
-router.get('/', fetchAllUsers);
-router.get('/:id', getUserById);
-router.patch('/:id', updateUser); // Note: using patch here instead of put for partial updates
-router.delete('/:id', deleteUser);
+router.get('/', authenticate, authorizeAdmin, fetchAllUsers);
+router.get('/:id', authenticate, getUserById);
+router.patch('/:id', authenticate, updateUser); // Note: using patch here instead of put for partial updates
+router.delete('/:id', authenticate, deleteUser);
 
 export default router;

@@ -87,11 +87,22 @@ npm run db:studio
 
 ## 🐳 Production Deployment
 
+### Docker (Standalone)
+1. **Build the production image:**
+   ```bash
+   docker build --target production -t acquisitions-api:latest .
+   ```
+2. **Run the container:**
+   ```bash
+   docker run -p 3000:3000 --env-file .env.production -d acquisitions-api:latest
+   ```
+
 ### Docker Compose
 1. Copy `.env.production` to `.env.prod.local` and add real credentials.
 2. Start the production stack:
    ```bash
    npm run docker:prod
+   # Alternatively: docker compose -f docker-compose.prod.yml up --build -d
    ```
 
 ### Kubernetes
@@ -118,7 +129,13 @@ The project includes a complete set of manifests in the `/k8s` directory.
    ```
 4. **Verify Deployment:**
    ```bash
-   kubectl get pods
+   # Watch pods until they are in the Running (1/1) state
+   kubectl get pods -w
+   
+   # View the live application logs
+   kubectl logs -f -l app=acquisitions-api
+   
+   # Forward traffic to test the API locally
    kubectl port-forward svc/acquisitions-service 3000:80
    ```
 

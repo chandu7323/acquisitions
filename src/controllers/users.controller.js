@@ -31,8 +31,17 @@ export const getUserById = async (req, res, next) => {
     const id = validatedData.params.id;
 
     logger.info(`Fetching user with id: ${id}`);
-    const user = await getUserByIdService(id);
+    if (req.user) {
+      const isSelf = req.user.id === id;
+      const isAdmin = req.user.role === 'admin';
 
+      if (!isSelf && !isAdmin) {
+        return res.status(403).json({
+          message: 'Forbidden: You can only view your own information',
+        });
+      }
+    }
+    const user = await getUserByIdService(id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -69,7 +78,7 @@ export const updateUser = async (req, res, next) => {
 
     // Authorization check logic
     if (req.user) {
-      const isSelf = req.user.id === id;
+      const isSelf = String(req.user.id) === String(id);
       const isAdmin = req.user.role === 'admin';
 
       // Can only modify their own info
@@ -114,7 +123,7 @@ export const deleteUser = async (req, res, next) => {
 
     // Authorization check logic
     if (req.user) {
-      const isSelf = req.user.id === id;
+      const isSelf = String(req.user.id) === String(id);
       const isAdmin = req.user.role === 'admin';
 
       if (!isSelf && !isAdmin) {

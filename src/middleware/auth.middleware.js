@@ -1,66 +1,25 @@
-import logger from '#config/logger.js';
 import { jwttoken } from '#utils/jwt.js';
+import { cookies } from '#utils/cookies.js';
+import logger from '#config/logger.js';
 
-export const authenticateToken = (req, res, next) => {
+export const authenticate = (req, res, next) => {
   try {
-    const token = req.cookies.token;
-
+    const token = cookies.get(req, 'token') || req.headers.authorization?.split(' ')[1];
     if (!token) {
-      return res.status(401).json({
-        error: 'Authentication required',
-        message: 'No access token provided',
-      });
+      return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const decoded = jwttoken.verify(token);
-    req.user = decoded;
-
-    logger.info(`User authenticated: ${decoded.email} (${decoded.role})`);
+    req.user = jwttoken.verify(token);
     next();
   } catch (e) {
-    logger.error('Authentication error:', e);
-
-    if (e.message === 'Failed to authenticate token') {
-      return res.status(401).json({
-        error: 'Authentication failed',
-        message: 'Invalid or expired token',
-      });
-    }
-
-    return res.status(500).json({
-      error: 'Internal server error',
-      message: 'Error during authentication',
-    });
+    logger.error('Authentication error', e);
+    return res.status(401).json({ error: 'Invalid or expired token' });
   }
 };
 
-export const requireRole = allowedRoles => {
-  return (req, res, next) => {
-    try {
-      if (!req.user) {
-        return res.status(401).json({
-          error: 'Authentication required',
-          message: 'User not authenticated',
-        });
-      }
-
-      if (!allowedRoles.includes(req.user.role)) {
-        logger.warn(
-          `Access denied for user ${req.user.email} with role ${req.user.role}. Required: ${allowedRoles.join(', ')}`
-        );
-        return res.status(403).json({
-          error: 'Access denied',
-          message: 'Insufficient permissions',
-        });
-      }
-
-      next();
-    } catch (e) {
-      logger.error('Role verification error:', e);
-      return res.status(500).json({
-        error: 'Internal server error',
-        message: 'Error during role verification',
-      });
-    }
-  };
+export const authorizeAdmin = (req, res, next) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden: Admin access required' });
+  }
+  next();
 };
