@@ -44,7 +44,9 @@ The project uses subpath imports for clean module resolution (e.g., `#controller
 ## 💻 Local Development
 
 ### 1. Environment Setup
+
 Create a `.env` file in the root directory:
+
 ```env
 PORT=3000
 NODE_ENV=development
@@ -54,18 +56,24 @@ ARCJET_KEY="your-arcjet-key"
 ```
 
 ### 2. Standard Development (Node.js)
+
 Install dependencies and start the watcher:
+
 ```bash
 npm install
 npm run dev
 ```
 
 ### 3. Docker Development
+
 Run the full local stack (App + Neon Local DB + Migrations) using Docker Compose:
+
 ```bash
 npm run docker:dev
 ```
+
 Stop the environment:
+
 ```bash
 npm run docker:dev:down
 ```
@@ -88,6 +96,7 @@ npm run db:studio
 ## 🐳 Production Deployment
 
 ### Docker (Standalone)
+
 1. **Build the production image:**
    ```bash
    docker build --target production -t acquisitions-api:latest .
@@ -98,6 +107,7 @@ npm run db:studio
    ```
 
 ### Docker Compose
+
 1. Copy `.env.production` to `.env.prod.local` and add real credentials.
 2. Start the production stack:
    ```bash
@@ -106,6 +116,7 @@ npm run db:studio
    ```
 
 ### Kubernetes
+
 The project includes a complete set of manifests in the `/k8s` directory.
 
 1. **Build and push the image:**
@@ -116,36 +127,42 @@ The project includes a complete set of manifests in the `/k8s` directory.
 2. **Update Secrets:**
    Edit `k8s/secrets.yaml` with your actual Neon Cloud `DATABASE_URL`, `JWT_SECRET`, and `ARCJET_KEY`.
 3. **Deploy to Cluster:**
+
    ```bash
    # Apply secrets
    kubectl apply -f k8s/secrets.yaml
-   
+
    # Run database migrations
    kubectl apply -f k8s/migration-job.yaml
-   
+
    # Deploy the API and Service
    kubectl apply -f k8s/deployment.yaml
    kubectl apply -f k8s/service.yaml
    ```
+
 4. **Verify Deployment:**
+
    ```bash
    # Watch pods until they are in the Running (1/1) state
    kubectl get pods -w
-   
+
    # View the live application logs
    kubectl logs -f -l app=acquisitions-api
-   
+
    # Forward traffic to test the API locally
    kubectl port-forward svc/acquisitions-service 3000:80
    ```
 
 ## 🧪 Testing
+
 Run the Jest test suite:
+
 ```bash
 npm test
 ```
 
 ## 📝 Code Quality
+
 ```bash
 npm run lint        # Check for ESLint errors
 npm run format      # Format code with Prettier

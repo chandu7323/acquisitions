@@ -13,10 +13,14 @@ export const signinSchema = z.object({
       required_error: 'Email is required',
       invalid_type_error: 'Email must be a string',
     })
-    .email('Invalid email address').toLowerCase().trim(),
-  password: z.string({ 
+    .email('Invalid email address')
+    .toLowerCase()
+    .trim(),
+  password: z
+    .string({
       required_error: 'Required',
-      invalid_type_error: 'Required' 
+      invalid_type_error: 'Required',
     })
-    .min(1, 'Required').min(1) // Prevents empty strings "" from passing
+    .min(1, 'Required')
+    .min(1), // Prevents empty strings "" from passing
 });

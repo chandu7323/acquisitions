@@ -4,7 +4,8 @@ import logger from '#config/logger.js';
 
 export const authenticate = (req, res, next) => {
   try {
-    const token = cookies.get(req, 'token') || req.headers.authorization?.split(' ')[1];
+    const token =
+      cookies.get(req, 'token') || req.headers.authorization?.split(' ')[1];
     if (!token) {
       return res.status(401).json({ error: 'Authentication required' });
     }
